@@ -1,0 +1,75 @@
+/*****************************************************************/
+/* COmPACT user routine: user_superCmpEvent(superCmpEvent *sevt) */
+/*                                                               */
+/* User routine called everytime an event `*sevt' is             */
+/* loaded. A return value of greater than zero denotes           */
+/* an error condition has occured.                               */
+/*                                     BH 13/2/98    RWM 20/6/97 */
+/*****************************************************************/
+
+#include <math.h>
+
+#include "cmpio.h"
+#include "user.h"
+#include "reader.h"
+
+
+int user_superCmpEvent(superBurst *sbur,superCmpEvent *sevt) {
+/* WARNING: do not alter things before this line */
+/*---------- Add user C code here ----------*/
+  static int nuserevt=0;
+  int i;
+
+  if(nuserevt<20) 
+  {
+     printSuperCmpEvent(sevt,fprt);
+  }
+
+//	printf("SuperCMPevent\n");
+	/*This section outputs the number of tracks per event to a file*/
+/*
+	if(sevt->Ntrack < binNo )
+	{
+		++frequencyBinsTracksPerEvent[sevt->Ntrack];
+	}
+	else
+	{
+		printf("you need more bins mate!\n");
+	}
+*/
+	/*This section outputs the total energy of each one track event to the file
+	photonEnergies.txt*/
+	if(sevt->Ntrack == 1) /*Only interested in the ke3 one track decay*/
+	{
+		float totalNonElectronEnergy = 0;
+/*		for(size_t i = 0; i < sevt->Ncluster;++i)
+		{	
+			//interested in energy from photons which leave no track
+			if(i != sevt->track[0].iClus)
+			{
+				totalNonElectronEnergy += sevt->cluster[i].energy;
+			}
+		}
+*/
+		if(sevt->LKRdownscaled == 0)
+		{
+//			printf("found one!\n");
+			totalNonElectronEnergy = sevt->LKRenergy;
+			if(totalNonElectronEnergy < 10)
+			{
+				fprintf(smallpeFP,"%f\n",totalNonElectronEnergy);	
+			}
+			else
+			{
+				fprintf(largepeFP,"%f\n",totalNonElectronEnergy);	
+			}
+		}
+	}	
+
+  nuserevt++;
+
+  
+/*----------- End of user C code -----------*/
+  return 0;
+}
+
